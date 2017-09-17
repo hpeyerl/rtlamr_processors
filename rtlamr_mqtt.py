@@ -3,8 +3,14 @@ import json
 import paho.mqtt.client as mqtt
 import time
 
+def on_disconnect(c, u, rc):
+    if rc != 0:
+        c.reconnect()
+
 client = mqtt.Client()
 client.connect("localhost", 1883, 60)
+client.on_disconnect = on_disconnect
+
 
 while 1:
     try:
@@ -22,8 +28,5 @@ while 1:
     topic = "{0}/vol".format(v["ID"])
     pay = "{0}".format(v["Consumption"])
     print("Publishing: {0} : {1}".format(topic,pay))
-    try:
-        client.publish(topic, payload=pay, retain=False)
-    except:
-        print("An error or some sort.")
+    client.publish(topic, payload=pay, retain=False)
     time.sleep(1)
